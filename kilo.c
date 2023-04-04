@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <termios.h>
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 
+#define KEYPRESS(k) ((k) & 0x1f)
 struct termios orig_termios;
 
 void disable_raw_mode()
@@ -29,19 +31,40 @@ void enable_raw_mode()
 
 }
 
+char editor_readkey()
+{
+    int nread;
+    char c;
+    nread = read(STDIN_FILENO, &c, 1);
+
+    if ((nread == -1) && errno == EAGAIN) exit(0);
+    return c;
+}
+
+void editor_processkey()
+{
+    char c; 
+    c = editor_readkey();
+    switch (c) {
+        case KEYPRESS('q'):
+            exit(0);
+            break;
+    }
+}
+
+void editor_refresh_screen() {
+  write(STDOUT_FILENO, "\x1b[2J", 4);
+  write(STDOUT_FILENO, "\x1b[H", 3);
+}
 
 int
-main(int argc, char **argv)
+main()
 {   
     enable_raw_mode();
-    char c;
-    while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q') {
-        if (iscntrl(c)) {
-            printf("%d\n", c);
-        } else {
-            printf("%d: ('%c')\n", c, c);
-        }
+    while (1) {
+        editor_refresh_screen();
+        editor_processkey();
     }
-
+    
     return 0;
 }
