@@ -13,7 +13,7 @@ Canonical mode is a configuration in the terminal that only sends keyboard input
 
 ## New functions I've learned
 - `atexit()`
-
+- 'ioctl()' used to get window sizes of a terminal, not always accurate though.
 ## Escape sequences
 `ctrl-m` should expect 13 but we get 10. This is because the terminal is turning carriage returns `\r` (13) into `\n` (10).
 
